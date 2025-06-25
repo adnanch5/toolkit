@@ -120,7 +120,19 @@
         .nav-links a:hover::after {
             width: 100%;
         }
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToolKit - Search Tools</title>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+        }
+        
         .search-bar {
             display: flex;
             background: var(--light);
@@ -128,6 +140,7 @@
             padding: 0.5rem 1rem;
             width: 300px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            position: relative;
         }
 
         .search-bar input {
@@ -144,12 +157,168 @@
             border: none;
             color: var(--gray);
             cursor: pointer;
-            transition: var(--transition);
+            transition: all 0.3s ease;
         }
 
         .search-bar button:hover {
             color: var(--primary);
         }
+        
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            margin-top: 8px;
+            max-height: 400px;
+            overflow-y: auto;
+            display: none;
+            z-index: 1000;
+        }
+        
+        .search-result-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #f1f1f1;
+        }
+        
+        .search-result-item:hover {
+            background: #f8f9fa;
+        }
+        
+        .search-result-item h4 {
+            margin: 0;
+            color: #333;
+            font-size: 15px;
+        }
+        
+        .search-result-item p {
+            margin: 4px 0 0;
+            color: var(--gray);
+            font-size: 13px;
+        }
+        
+        .no-results {
+            padding: 12px 16px;
+            color: var(--gray);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="search-bar">
+        <input type="text" id="search-input" placeholder="Search tools...">
+        <button id="search-button"><i class="fas fa-search"></i></button>
+        <div class="search-results" id="search-results"></div>
+    </div>
+
+    <!-- Font Awesome for search icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        // Sample tool data - replace with your actual tools
+        const tools = [
+            { 
+                name: "Image Compressor", 
+                description: "Reduce image file size without losing quality", 
+                url: "https://adnanch5.github.io/toolkit/image-compressor" 
+            },
+            { 
+                name: "PDF Merger", 
+                description: "Combine multiple PDF files into one document", 
+                url: "https://adnanch5.github.io/toolkit/pdf-merger" 
+            },
+            { 
+                name: "Image Converter", 
+                description: "Convert between JPG, PNG, WEBP and other formats", 
+                url: "https://adnanch5.github.io/toolkit/image-converter" 
+            },
+            { 
+                name: "PDF to Word", 
+                description: "Convert PDF documents to editable Word files", 
+                url: "https://adnanch5.github.io/toolkit/pdf-to-word" 
+            },
+            { 
+                name: "Watermark Remover", 
+                description: "Remove watermarks from images automatically", 
+                url: "https://adnanch5.github.io/toolkit/watermark-remover" 
+            }
+            // Add all your other tools here
+        ];
+
+        const searchInput = document.getElementById('search-input');
+        const searchResults = document.getElementById('search-results');
+        const searchButton = document.getElementById('search-button');
+
+        // Search function
+        function searchTools(query) {
+            const results = tools.filter(tool => 
+                tool.name.toLowerCase().includes(query.toLowerCase()) || 
+                tool.description.toLowerCase().includes(query.toLowerCase())
+            );
+            
+            displayResults(results);
+        }
+
+        // Display results
+        function displayResults(results) {
+            searchResults.innerHTML = '';
+            
+            if (results.length === 0) {
+                searchResults.innerHTML = '<div class="no-results">No tools found</div>';
+            } else {
+                results.forEach(tool => {
+                    const item = document.createElement('div');
+                    item.className = 'search-result-item';
+                    item.innerHTML = `
+                        <h4>${tool.name}</h4>
+                        <p>${tool.description}</p>
+                    `;
+                    item.addEventListener('click', () => {
+                        window.location.href = tool.url;
+                    });
+                    searchResults.appendChild(item);
+                });
+            }
+            
+            searchResults.style.display = 'block';
+        }
+
+        // Event listeners
+        searchInput.addEventListener('input', (e) => {
+            if (e.target.value.length > 0) {
+                searchTools(e.target.value);
+            } else {
+                searchResults.style.display = 'none';
+            }
+        });
+
+        searchButton.addEventListener('click', () => {
+            if (searchInput.value.length > 0) {
+                searchTools(searchInput.value);
+            }
+        });
+
+        // Hide results when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.search-bar')) {
+                searchResults.style.display = 'none';
+            }
+        });
+
+        // Hide results on ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                searchResults.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
 
         .auth-buttons {
             display: flex;
