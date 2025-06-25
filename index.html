@@ -132,27 +132,29 @@
             --light: #f8f9fa;
             --gray: #6c757d;
         }
-        
-        .search-bar {
-            display: flex;
-            background: var(--light);
-            border-radius: 50px;
-            padding: 0.5rem 1rem;
-            width: 300px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            position: relative;
-        }
-<!DOCTYPE html>
+        <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ToolKit - Search Tools</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --primary: #4361ee;
+            --primary-dark: #3a56d4;
             --light: #f8f9fa;
+            --dark: #212529;
             --gray: #6c757d;
+            --light-gray: #e9ecef;
+            --border-radius: 12px;
+            --shadow: 0 8px 24px rgba(0,0,0,0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        .search-container {
+            position: relative;
+            width: 300px;
         }
         
         .search-bar {
@@ -160,9 +162,10 @@
             background: var(--light);
             border-radius: 50px;
             padding: 0.5rem 1rem;
-            width: 300px;
+            width: 100%;
             box-shadow: 0 4px 10px rgba(0,0,0,0.05);
             position: relative;
+            z-index: 100;
         }
 
         .search-bar input {
@@ -179,7 +182,10 @@
             border: none;
             color: var(--gray);
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .search-bar button:hover {
@@ -192,30 +198,35 @@
             left: 0;
             width: 100%;
             background: white;
-            border-radius: 8px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-            margin-top: 8px;
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-top: -10px;
+            padding-top: 10px;
             max-height: 400px;
             overflow-y: auto;
             display: none;
-            z-index: 1000;
+            z-index: 99;
         }
         
         .search-result-item {
             padding: 12px 16px;
             cursor: pointer;
-            transition: all 0.2s ease;
-            border-bottom: 1px solid #f1f1f1;
+            transition: var(--transition);
+            border-bottom: 1px solid var(--light-gray);
+            display: block;
+            text-decoration: none;
+            color: var(--dark);
         }
         
         .search-result-item:hover {
-            background: #f8f9fa;
+            background: var(--light);
         }
         
         .search-result-item h4 {
             margin: 0;
-            color: #333;
+            color: var(--dark);
             font-size: 15px;
+            font-weight: 600;
         }
         
         .search-result-item p {
@@ -225,22 +236,178 @@
         }
         
         .no-results {
-            padding: 12px 16px;
+            padding: 16px;
             color: var(--gray);
             text-align: center;
+            font-size: 14px;
+        }
+        
+        .search-result-category {
+            padding: 8px 16px;
+            background: var(--light);
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
         }
     </style>
 </head>
 <body>
-    <div class="search-bar">
-        <input type="text" id="search-input" placeholder="Search tools...">
-        <button id="search-button"><i class="fas fa-search"></i></button>
+    <div class="search-container">
+        <div class="search-bar">
+            <input type="text" id="search-input" placeholder="Search tools...">
+            <button id="search-button"><i class="fas fa-search"></i></button>
+        </div>
         <div class="search-results" id="search-results"></div>
     </div>
 
-    <!-- Font Awesome for search icon -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        // All tools data - update with your actual tools
+        const tools = [
+            // Image Tools
+            { 
+                name: "Image Compressor", 
+                description: "Reduce image file size without losing quality", 
+                url: "image-compressor.html",
+                category: "Image Tools"
+            },
+            { 
+                name: "Image Converter", 
+                description: "Convert between JPG, PNG, WEBP formats", 
+                url: "image-converter.html",
+                category: "Image Tools"
+            },
+            { 
+                name: "Image Resizer", 
+                description: "Resize images to specific dimensions", 
+                url: "image-resizer.html",
+                category: "Image Tools"
+            },
+            
+            // PDF Tools
+            { 
+                name: "PDF Merger", 
+                description: "Combine multiple PDF files into one", 
+                url: "pdf-merger.html",
+                category: "PDF Tools"
+            },
+            { 
+                name: "PDF to Word", 
+                description: "Convert PDF documents to editable Word", 
+                url: "pdf-to-word.html",
+                category: "PDF Tools"
+            },
+            { 
+                name: "PDF Compressor", 
+                description: "Reduce PDF file size while maintaining quality", 
+                url: "pdf-compressor.html",
+                category: "PDF Tools"
+            },
+            
+            // Add all your other tools here...
+            // Format: {name, description, url, category}
+        ];
 
+        // DOM elements
+        const searchInput = document.getElementById('search-input');
+        const searchResults = document.getElementById('search-results');
+        const searchButton = document.getElementById('search-button');
+
+        // Search function
+        function searchTools(query) {
+            if (query.length < 1) {
+                searchResults.style.display = 'none';
+                return;
+            }
+            
+            const results = tools.filter(tool => 
+                tool.name.toLowerCase().includes(query.toLowerCase()) || 
+                tool.description.toLowerCase().includes(query.toLowerCase())
+            );
+            
+            displayResults(results);
+        }
+
+        // Display results grouped by category
+        function displayResults(results) {
+            searchResults.innerHTML = '';
+            
+            if (results.length === 0) {
+                searchResults.innerHTML = '<div class="no-results">No tools found matching your search</div>';
+                searchResults.style.display = 'block';
+                return;
+            }
+            
+            // Group by category
+            const groupedResults = results.reduce((acc, tool) => {
+                if (!acc[tool.category]) {
+                    acc[tool.category] = [];
+                }
+                acc[tool.category].push(tool);
+                return acc;
+            }, {});
+            
+            // Display grouped results
+            for (const category in groupedResults) {
+                const categoryHeader = document.createElement('div');
+                categoryHeader.className = 'search-result-category';
+                categoryHeader.textContent = category;
+                searchResults.appendChild(categoryHeader);
+                
+                groupedResults[category].forEach(tool => {
+                    const item = document.createElement('a');
+                    item.className = 'search-result-item';
+                    item.href = tool.url;
+                    item.innerHTML = `
+                        <h4>${tool.name}</h4>
+                        <p>${tool.description}</p>
+                    `;
+                    searchResults.appendChild(item);
+                });
+            }
+            
+            searchResults.style.display = 'block';
+        }
+
+        // Event listeners
+        searchInput.addEventListener('input', (e) => {
+            searchTools(e.target.value);
+        });
+
+        searchButton.addEventListener('click', () => {
+            searchTools(searchInput.value);
+        });
+
+        // Hide results when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.search-container')) {
+                searchResults.style.display = 'none';
+            }
+        });
+
+        // Hide results on ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                searchResults.style.display = 'none';
+                searchInput.blur();
+            }
+        });
+
+        // Show all tools when search input is focused
+        searchInput.addEventListener('focus', () => {
+            if (searchInput.value === '') {
+                displayResults(tools);
+            }
+        });
+    </script>
+</body>
+</html>
+{
+    name: "New Tool",
+    description: "Tool description",
+    url: "tool.html",
+    category: "New Category"
+}
     <script>
         // Sample tool data - replace with your actual tools
         const tools = [
